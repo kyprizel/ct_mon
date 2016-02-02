@@ -1,7 +1,7 @@
 package main
 
 import (
-    "./cmd"
+    "github.com/kyprizel/ct_mon/cmd"
 )
 
 func main() {
