@@ -120,15 +120,6 @@ func (ctx *MonCtx) SetConfig(fileName string, verbose bool) error {
 		conf.SMTPSubj = "Certificate Transparency monitor notification"
 	}
 
-	if isBadSMTPConf && isBadDBConf {
-		log.Fatal("No notifications or DB configured, no reason to start")
-	}
-
-	if conf.StoreMatches {
-		if isBadDBConf {
-			log.Fatal("No DB configured, can't store matches")
-		}
-	}
 
 	if conf.NotifyMatches {
 		if isBadSMTPConf {
@@ -149,6 +140,10 @@ func (ctx *MonCtx) SetConfig(fileName string, verbose bool) error {
 	/* Init DB connection */
 	if conf.MongoURI != "" {
 		ctx.db, err = db.Init(conf.MongoURI)
+		if err != nil || ctx.db == nil {
+			isBadDBConf = true
+		}
+
 		if err == nil {
 			/* Load last index state from DB */
 			startIndex, err = ctx.db.LoadState()
@@ -161,6 +156,16 @@ func (ctx *MonCtx) SetConfig(fileName string, verbose bool) error {
 	/* Override index if set via config */
 	if conf.StartIndex > ctx.StartIndex {
 		ctx.StartIndex = conf.StartIndex
+	}
+
+	if conf.StoreMatches {
+		if isBadDBConf {
+			log.Print("No DB configured, can't store matches")
+		}
+	}
+
+	if isBadSMTPConf && isBadDBConf {
+		log.Fatal("No notifications or DB configured, no reason to start")
 	}
 
 	ctx.conf = &conf
@@ -187,10 +192,13 @@ func (m *MonCtx) Serve(ctx context.Context) error {
 	opts.ParallelFetch = m.conf.ParallelFetch
 	opts.StartIndex = m.StartIndex
 	opts.TickTime = time.Duration(m.conf.TickTime) * time.Second
-	opts.Tickers = []scanner.Ticker{scanner.LogTicker{}, StateSaverTicker{mon: m}}
+	opts.Tickers = []scanner.Ticker{scanner.LogTicker{}}
 	opts.Quiet = !m.conf.Verbose
+	if m.db != nil {
+		opts.Tickers = append(opts.Tickers, StateSaverTicker{mon: m})
+	}
 
-	if m.conf.StoreMatches {
+	if m.db != nil && m.conf.StoreMatches {
 		ch := make(chan models.MonEvent)
 		m.Handlers = append(m.Handlers, ch)
 		dbWorker := db.CertHandler{DB: m.db}
@@ -244,11 +252,14 @@ type StateSaverTicker struct {
 }
 
 func (t StateSaverTicker) HandleTick(s *scanner.Scanner, startTime time.Time, sth *ct.SignedTreeHead) {
+	if t.mon.db == nil {
+		return
+	}
 	if t.mon.conf.Verbose {
 		log.Print("Saving state to database...\n")
 	}
 	err := t.mon.db.SaveState(t.mon.StartIndex + int64(s.CertsProcessed))
 	if err != nil {
-		log.Fatal(err)
+		log.Print("Can't save state (%v)", err)
 	}
 }

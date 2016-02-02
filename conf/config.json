@@ -1,16 +1,15 @@
 {
  "match_subject_regex": "(?i)(yandex\\.|yandex-team)",
  "notify_persons": ["eldar@kyprizel.net"],
- "mongo_uri1": "mongodb://myruser:mypass@localhost:28017/ct",
- "mongo_uri": "localhost",
+ "mongo_uri": "127.0.0.2",
  "store_matches": true,
- "save_state": 600,
- "smtp_from": "user@domain.com",
- "smtp_host": "localhost",
+ "save_state": 3,
+ "smtp_from": "pki@yourdomain.com",
+ "smtp_host": "smtp.yourdomain.com",
  "smtp_port": 25,
  "smtp_subject": "CT monitor notification",
  "notify_on_match": true,
  "ca_whitelist": ["YandexExternalCA", "GlobalSign Organization Validation CA - G2", "Yandex CA"],
- "start_index": 102780000,
+ "start_index": 10278000,
  "rescan_period": 30
 }
