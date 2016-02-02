@@ -57,10 +57,10 @@ Content-Transfer-Encoding: 8bit
         <div>
         <h2>New certificate found</h2>
         <table>
-         <tr><th>Log Index:</th><td>{{ .Index }}</td></tr>
-         <tr><th>SHA256:</th><td>{{ .Hashsum }}</td></tr>
-         <tr><th>CN:</th><td>{{ .CN }}</td></tr>
-         <tr><th>Issuer:</th><td>{{ .Issuer }}</td></tr>
+         <tr><th align="left">Log Index:</th><td>{{ .Index }}</td></tr>
+         <tr><th align="left">SHA256:</th><td>{{ .Hashsum }}</td></tr>
+         <tr><th align="left">CN:</th><td>{{ .CN }}</td></tr>
+         <tr><th align="left">Issuer:</th><td>{{ .Issuer }}</td></tr>
          <tr><th align="left"><a href="https://crt.sh/?sha256={{ .Hashsum }}">View details</a></th><td></td></tr>
          <tr><th align="left">SANs:</th><td></td></tr>
          <tr>
