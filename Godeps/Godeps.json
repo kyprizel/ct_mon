@@ -1,0 +1,30 @@
+{
+	"ImportPath": "github.com/kyprizel/ct_mon",
+	"GoVersion": "go1.5",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/google/certificate-transparency/go",
+			"Rev": "1cdd6b5f4ccaa296bc34dea5364ccfa90af0154d"
+		},
+		{
+			"ImportPath": "github.com/kyprizel/certificate-transparency/go/scanner",
+			"Rev": "53372af14a5fb4049853afb018194959b632b822"
+		},
+		{
+			"ImportPath": "github.com/mreiferson/go-httpclient",
+			"Rev": "63fe23f7434723dc904c901043af07931f293c47"
+		},
+		{
+			"ImportPath": "golang.org/x/net/context",
+			"Rev": "644ffc06205c045a7d696b9a212191615d30b77b"
+		},
+		{
+			"ImportPath": "gopkg.in/mgo.v2",
+			"Comment": "r2015.12.06-2-g03c9f3e",
+			"Rev": "03c9f3ee4c14c8e51ee521a6a7d0425658dd6f64"
+		}
+	]
+}
