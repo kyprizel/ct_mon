@@ -1,16 +1,20 @@
 Description
 ===========
 
-*ct_mon* monitors Certificate Trasparency logs by specified regexp in CN or SAN, sends mail notifications/stores certificate details in MongoDB.
+**ct_mon** monitors Certificate Trasparency logs by specified regexp in CN or SAN, sends mail notifications/stores certificate details in MongoDB.
 
 How to run
 ==========
 
-$ git clone https://github.com/kyprizel/ct_mon.git ct_mon
-$ cd ct_mon
-$ vi conf/config.json
-$ docker build -t ct_mon .
-$ docker run ct_mon
+    $ git clone https://github.com/kyprizel/ct_mon.git ct_mon
+
+    $ cd ct_mon
+
+    $ vi conf/config.json
+
+    $ docker build -t ct_mon .
+
+    $ docker run ct_mon
 
 I recommend to setup MongoDB to store the monitoring states and/or certificate matches.
 
