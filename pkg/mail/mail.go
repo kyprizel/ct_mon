@@ -1,18 +1,18 @@
 package mail
 
 import (
-    "log"
-    "fmt"
-    "bytes"
-    "strings"
-    "crypto/sha256"
-    "encoding/pem"
-    "encoding/hex"
+	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/pem"
+	"fmt"
+	"log"
+	"strings"
 
-    "html/template"
-    "net/smtp"
+	"html/template"
+	"net/smtp"
 
-    "github.com/kyprizel/ct_mon/models"
+	"github.com/kyprizel/ct_mon/models"
 )
 
 const mail_tpl = `From: {{ .From }}
@@ -83,102 +83,102 @@ Content-Transfer-Encoding: 8bit
 `
 
 type CertHandler struct {
-    Emails  []string
-    Host    string
-    Port    int
-    User    string
-    Password  string
-    From    string
-    Subj    string
+	Emails   []string
+	Host     string
+	Port     int
+	User     string
+	Password string
+	From     string
+	Subj     string
 }
 
 func (s *CertHandler) HandleEvents(ch chan models.MonEvent) {
-    for {
-        ev := <- ch
-        entry := *ev.LogEntry
-        switch ev.Type {
-            case models.CT_CERT:
-                pemCert := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: entry.X509Cert.Raw})
-                hasher := sha256.New()
-                hasher.Write(entry.X509Cert.Raw)
-                sha := hex.EncodeToString(hasher.Sum(nil))
-                t, _ := template.New("notification").Parse(mail_tpl)
-                data := struct {
-                    From string
-                    Subject string
-                    To string
-                    Index int64
-                    CN string
-                    SAN []string
-                    Issuer string
-                    Pem string
-                    Hashsum string
-                }{
-                    From: s.From,
-                    To: strings.Join([]string(s.Emails), ","),
-                    Subject: s.Subj,
-                    Index: entry.Index,
-                    CN: entry.X509Cert.Subject.CommonName,
-                    SAN: entry.X509Cert.DNSNames,
-                    Issuer: entry.X509Cert.Issuer.CommonName,
-                    Pem: string(pemCert),
-                    Hashsum: sha,
-                }
-                buf := new(bytes.Buffer)
-                t.Execute(buf, data)
+	for {
+		ev := <-ch
+		entry := *ev.LogEntry
+		switch ev.Type {
+		case models.CT_CERT:
+			pemCert := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: entry.X509Cert.Raw})
+			hasher := sha256.New()
+			hasher.Write(entry.X509Cert.Raw)
+			sha := hex.EncodeToString(hasher.Sum(nil))
+			t, _ := template.New("notification").Parse(mail_tpl)
+			data := struct {
+				From    string
+				Subject string
+				To      string
+				Index   int64
+				CN      string
+				SAN     []string
+				Issuer  string
+				Pem     string
+				Hashsum string
+			}{
+				From:    s.From,
+				To:      strings.Join([]string(s.Emails), ","),
+				Subject: s.Subj,
+				Index:   entry.Index,
+				CN:      entry.X509Cert.Subject.CommonName,
+				SAN:     entry.X509Cert.DNSNames,
+				Issuer:  entry.X509Cert.Issuer.CommonName,
+				Pem:     string(pemCert),
+				Hashsum: sha,
+			}
+			buf := new(bytes.Buffer)
+			t.Execute(buf, data)
 
-                var auth smtp.Auth
-                if (s.User != "" && s.Password != "") {
-                    auth = smtp.PlainAuth("", s.User, s.Password, s.Host)
-                }
+			var auth smtp.Auth
+			if s.User != "" && s.Password != "" {
+				auth = smtp.PlainAuth("", s.User, s.Password, s.Host)
+			}
 
-                /* XXX: handle errors */
-                err := smtp.SendMail(fmt.Sprintf("%s:%d", s.Host, s.Port), auth, s.From, s.Emails, buf.Bytes())
-                if err != nil {
-                    log.Print("Error sending email")
-                }
-            case models.CT_PRECERT:
-                pemCert := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: entry.Precert.TBSCertificate.Raw})
-                hasher := sha256.New()
-                hasher.Write(entry.Precert.TBSCertificate.Raw)
-                sha := hex.EncodeToString(hasher.Sum(nil))
-                t, _ := template.New("notification").Parse(mail_tpl)
-                data := struct {
-                    From string
-                    Subject string
-                    To string
-                    Index int64
-                    CN string
-                    SAN []string
-                    Issuer string
-                    Pem string
-                    Hashsum string
-                }{
-                    From: s.From,
-                    To: strings.Join([]string(s.Emails), ","),
-                    Subject: s.Subj,
-                    Index: entry.Index,
-                    CN: entry.Precert.TBSCertificate.Subject.CommonName,
-                    SAN: entry.Precert.TBSCertificate.DNSNames,
-                    Issuer: entry.Precert.TBSCertificate.Issuer.CommonName,
-                    Pem: string(pemCert),
-                    Hashsum: sha,
-                }
-                buf := new(bytes.Buffer)
-                t.Execute(buf, data)
+			/* XXX: handle errors */
+			err := smtp.SendMail(fmt.Sprintf("%s:%d", s.Host, s.Port), auth, s.From, s.Emails, buf.Bytes())
+			if err != nil {
+				log.Print("Error sending email")
+			}
+		case models.CT_PRECERT:
+			pemCert := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: entry.Precert.TBSCertificate.Raw})
+			hasher := sha256.New()
+			hasher.Write(entry.Precert.TBSCertificate.Raw)
+			sha := hex.EncodeToString(hasher.Sum(nil))
+			t, _ := template.New("notification").Parse(mail_tpl)
+			data := struct {
+				From    string
+				Subject string
+				To      string
+				Index   int64
+				CN      string
+				SAN     []string
+				Issuer  string
+				Pem     string
+				Hashsum string
+			}{
+				From:    s.From,
+				To:      strings.Join([]string(s.Emails), ","),
+				Subject: s.Subj,
+				Index:   entry.Index,
+				CN:      entry.Precert.TBSCertificate.Subject.CommonName,
+				SAN:     entry.Precert.TBSCertificate.DNSNames,
+				Issuer:  entry.Precert.TBSCertificate.Issuer.CommonName,
+				Pem:     string(pemCert),
+				Hashsum: sha,
+			}
+			buf := new(bytes.Buffer)
+			t.Execute(buf, data)
 
-                var auth smtp.Auth
-                if (s.User != "" && s.Password != "") {
-                    auth = smtp.PlainAuth("", s.User, s.Password, s.Host)
-                }
+			var auth smtp.Auth
+			if s.User != "" && s.Password != "" {
+				auth = smtp.PlainAuth("", s.User, s.Password, s.Host)
+			}
 
-                /* XXX: handle errors */
-                err := smtp.SendMail(fmt.Sprintf("%s:%d", s.Host, s.Port), auth, s.From, s.Emails, buf.Bytes())
-                if err != nil {
-                    log.Print("Error sending email")
-                }
-            case models.CT_QUIT:
-                break
-        }
-    }
+			/* XXX: handle errors */
+			err := smtp.SendMail(fmt.Sprintf("%s:%d", s.Host, s.Port), auth, s.From, s.Emails, buf.Bytes())
+			if err != nil {
+				log.Print("Error sending email")
+			}
+		case models.CT_QUIT:
+			break
+		}
+	}
 }
