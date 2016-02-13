@@ -216,7 +216,6 @@ func (m *MonCtx) Serve(ctx context.Context) error {
 	}
 
 	for {
-
 		scanner := scanner.NewScanner(logClient, *opts)
 		err = scanner.Scan(func(entry *ct.LogEntry) {
 			for _, ch := range m.Handlers {
@@ -236,6 +235,9 @@ func (m *MonCtx) Serve(ctx context.Context) error {
 		if m.conf.Verbose {
 			log.Print("Scan complete sleeping...")
 		}
+		/* do not fetch from old startindex in cycle */
+		opts.StartIndex = m.StartIndex + int64(scanner.CertsProcessed))
+
 		time.Sleep(time.Duration(m.conf.RescanPeriod) * time.Second)
 	}
 
