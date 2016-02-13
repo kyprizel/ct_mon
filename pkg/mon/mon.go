@@ -236,7 +236,7 @@ func (m *MonCtx) Serve(ctx context.Context) error {
 			log.Print("Scan complete sleeping...")
 		}
 		/* do not fetch from old startindex in cycle */
-		opts.StartIndex = m.StartIndex + int64(scanner.CertsProcessed))
+		opts.StartIndex = m.StartIndex + int64(scanner.CertsProcessed)
 
 		time.Sleep(time.Duration(m.conf.RescanPeriod) * time.Second)
 	}
