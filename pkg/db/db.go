@@ -120,7 +120,9 @@ func (m *MonDB) StoreCertDetails(cert *CertInfo) error {
 
 	col := session.DB("").C("certificate_details")
 	/* do not store same entry more than once */
-	if !col.Has(bson.M{"index": cert.Index}) {
+	var cnt int
+	cnt, err = col.Count(bson.M{"index": cert.Index})
+	if cnt < 1 {
 		cert.Id = bson.NewObjectId()
 		cert.Created = time.Now().UTC()
 		return col.Insert(cert)
