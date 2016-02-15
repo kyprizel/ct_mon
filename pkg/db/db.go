@@ -119,9 +119,13 @@ func (m *MonDB) StoreCertDetails(cert *CertInfo) error {
 	}
 
 	col := session.DB("").C("certificate_details")
-	cert.Id = bson.NewObjectId()
-	cert.Created = time.Now().UTC()
-	return col.Insert(cert)
+	/* do not store same entry more than once */
+	if !col.Has(bson.M{"index": cert.Index}) {
+		cert.Id = bson.NewObjectId()
+		cert.Created = time.Now().UTC()
+		return col.Insert(cert)
+	}
+	return nil;
 }
 
 type CertHandler struct {
