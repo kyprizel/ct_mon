@@ -121,7 +121,7 @@ func (m *MonDB) StoreCertDetails(cert *CertInfo) error {
 	col := session.DB("").C("certificate_details")
 	/* do not store same entry more than once */
 	var cnt int
-	cnt, err = col.Count(bson.M{"index": cert.Index})
+	cnt, err = col.Find(bson.M{"index": cert.Index}).Count()
 	if cnt < 1 {
 		cert.Id = bson.NewObjectId()
 		cert.Created = time.Now().UTC()
