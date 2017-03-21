@@ -62,8 +62,9 @@ func (m *MonDB) getSession() (*mgo.Session, error) {
 		if err != nil {
 			return nil, err
 		}
+		return m.session, nil
 	}
-	return m.session.Clone(), nil
+	return m.session.Copy(), nil
 }
 
 func (m *MonDB) LoadState() (int64, error) {

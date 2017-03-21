@@ -1,9 +1,10 @@
 {
  "match_subject_regex": "(?i)(yandex\\.|yandex-team)",
  "notify_persons": ["eldar@kyprizel.net"],
+ "log_uri": "http://ct.googleapis.com/pilot",
  "mongo_uri": "127.0.0.2",
  "store_matches": true,
- "save_state": 3,
+ "save_state": 120,
  "smtp_from": "pki@yourdomain.com",
  "smtp_host": "smtp.yourdomain.com",
  "smtp_port": 25,
@@ -11,5 +12,5 @@
  "notify_on_match": true,
  "ca_whitelist": ["YandexExternalCA", "GlobalSign Organization Validation CA - G2", "Yandex CA"],
  "start_index": 10278000,
- "rescan_period": 30
+ "rescan_period": 600
 }
