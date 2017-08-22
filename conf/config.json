@@ -1,5 +1,6 @@
 {
  "match_subject_regex": "(?i)(yandex\\.|yandex-team)",
+ "match_subject_fuzzy": ["yandex", "yandex-team"],
  "notify_persons": ["eldar@kyprizel.net"],
  "log_uri": "http://ct.googleapis.com/pilot",
  "mongo_uri": "127.0.0.2",

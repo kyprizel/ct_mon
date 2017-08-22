@@ -49,9 +49,11 @@ type MonDB struct {
 func Init(uri string) (*MonDB, error) {
 	session, err := mgo.Dial(uri)
 	if err != nil {
+		log.Printf("DB connection error (%v)\n", err)
 		return nil, err
 	}
 	m := &MonDB{uri: uri, session: session}
+
 	return m, nil
 }
 
@@ -60,17 +62,19 @@ func (m *MonDB) getSession() (*mgo.Session, error) {
 		var err error
 		m.session, err = mgo.Dial(m.uri)
 		if err != nil {
+			log.Printf("DB connection error (%v)\n", err)
 			return nil, err
 		}
 		return m.session, nil
 	}
+
 	return m.session.Copy(), nil
 }
 
 func (m *MonDB) LoadState() (int64, error) {
 	session, err := m.getSession()
 	if err != nil {
-		log.Print("DB connection error\n")
+		log.Printf("DB connection error (%v)\n", err)
 		return 0, err
 	}
 	col := session.DB("").C("state")
@@ -87,7 +91,7 @@ func (m *MonDB) LoadState() (int64, error) {
 func (m *MonDB) SaveState(StartIndex int64) error {
 	session, err := m.getSession()
 	if err != nil {
-		log.Print("DB connection error\n")
+		log.Printf("DB connection error (%v)\n", err)
 		return err
 	}
 
@@ -115,7 +119,7 @@ func (m *MonDB) SaveState(StartIndex int64) error {
 func (m *MonDB) StoreCertDetails(cert *CertInfo) error {
 	session, err := m.getSession()
 	if err != nil {
-		log.Print("DB connection error\n")
+		log.Printf("DB connection error (%v)\n", err)
 		return err
 	}
 

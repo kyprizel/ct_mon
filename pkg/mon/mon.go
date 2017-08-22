@@ -22,6 +22,7 @@ import (
 type MonConfig struct {
 	LogUri            string   `json:"log_uri"`
 	MatchSubjectRegex string   `json:"match_subject_regex"`
+	MatchSubjectFuzzy []string   `json:"match_subject_fuzzy"`
 	BatchSize         int      `json:"batch_size"`
 	NumWorkers        int      `json:"num_workers"`
 	ParallelFetch     int      `json:"parallel_fetch"`
@@ -180,7 +181,7 @@ func (m *MonCtx) Serve(ctx context.Context) error {
 		CNset[v] = true
 	}
 
-	matcher, err := matcher.CreateMatcherFromFlags(m.conf.MatchSubjectRegex, CNset)
+	matcher, err := matcher.CreateMatcherFromFlags(m.conf.MatchSubjectRegex, CNset, m.conf.MatchSubjectFuzzy)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -5,13 +5,15 @@ import (
 
 	"github.com/google/certificate-transparency/go"
 	"github.com/google/certificate-transparency/go/x509"
+	"github.com/renstrom/fuzzysearch/fuzzy"
 	"github.com/kyprizel/certificate-transparency/go/scanner"
 )
 
 type MatchSubjectRegexUnkCA struct {
 	CertificateSubjectRegex    *regexp.Regexp
 	PrecertificateSubjectRegex *regexp.Regexp
-	CAWhitelist                map[string]bool
+	FuzzySubject                []string
+	CAWhitelist                 map[string]bool
 }
 
 // Returns true if either CN or any SAN of |c| matches |CertificateSubjectRegex| and Issuer not in CA whitelist.
@@ -23,7 +25,11 @@ func (m MatchSubjectRegexUnkCA) CertificateMatches(c *x509.Certificate) bool {
 		if m.CertificateSubjectRegex.FindStringIndex(alt) != nil {
 			return !m.CAWhitelist[c.Issuer.CommonName]
 		}
+		if fuzzy.Find(alt, m.FuzzySubject) != nil {
+			return true
+		}
 	}
+
 	return false
 }
 
@@ -36,11 +42,14 @@ func (m MatchSubjectRegexUnkCA) PrecertificateMatches(p *ct.Precertificate) bool
 		if m.PrecertificateSubjectRegex.FindStringIndex(alt) != nil {
 			return !m.CAWhitelist[p.TBSCertificate.Issuer.CommonName]
 		}
+		if fuzzy.Find(alt, m.FuzzySubject) != nil {
+			return true
+		}
 	}
 	return false
 }
 
-func CreateMatcherFromFlags(MatchSubjectRegex string, CNset map[string]bool) (scanner.Matcher, error) {
+func CreateMatcherFromFlags(MatchSubjectRegex string, CNset map[string]bool, FuzzySubjects []string) (scanner.Matcher, error) {
 	// Make a regex matcher
 	var certRegex *regexp.Regexp
 	certRegex = regexp.MustCompile(MatchSubjectRegex)
@@ -48,5 +57,6 @@ func CreateMatcherFromFlags(MatchSubjectRegex string, CNset map[string]bool) (sc
 	return MatchSubjectRegexUnkCA{
 		CertificateSubjectRegex:    certRegex,
 		PrecertificateSubjectRegex: certRegex,
+		FuzzySubject:               FuzzySubjects,
 		CAWhitelist:                CNset}, nil
 }
